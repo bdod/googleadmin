@@ -9,10 +9,17 @@ from apiclient import discovery
 from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
+import argparse
 
 try:
     import argparse
-    flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
+    """ get arguments """
+    parser = argparse.ArgumentParser(parents=[tools.argparser])    
+    parser.add_argument("--user", dest="user", help="Use <all> for print all users")
+    parser.add_argument("--get", dest='get', action="store_true")
+#    args = vars(parser.parse_args())
+    flags = parser.parse_args()
+    #flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
 except ImportError:
     flags = None
 
@@ -52,8 +59,8 @@ def get_credentials():
     return credentials
 
 def print_users(service):
-    results = service.users().list(customer='my_customer', maxResults=10,
-        orderBy='email').execute()
+    #results = service.users().list(customer='my_customer', maxResults=10,
+    results = service.users().list(customer='my_customer',orderBy='email').execute()
     users = results.get('users', [])
     
     if not users:
@@ -96,10 +103,8 @@ def get_service():
     return service
 
 
-
 def main():
-    """Shows basic usage of the Google Admin SDK Directory API.
-
+    """
     Creates a Google Admin SDK API service object and outputs a list of first
     10 users in the domain.
     """
@@ -107,8 +112,13 @@ def main():
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('admin', 'directory_v1', http=http)
 
+    if flags.user:
+      if flags.get:
+        print_users(service)
+       
+
     #update_emails(service)
-    print(service.users().list(customer='my_customer').execute())
+    #print(service.users().list(customer='my_customer').execute())
     #print('Getting the first 10 users in the domain')
 
 
